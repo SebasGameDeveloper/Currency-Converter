@@ -13,14 +13,28 @@ struct ContentView: View {
     @State var showExchangeInfo = false
     @State var showSelectCurrency = false
     
-    @State var leftAmount = ""
-    @State var rightAmount = ""
+    @AppStorage("leftAmount") private var leftAmount: String = ""
+    @AppStorage("rightAmount") private var rightAmount: String = ""
     
     @FocusState var lefTyping
     @FocusState var rightTyping
     
-    @State var leftCurrency: Currency = .silverPiece
-    @State var rightCurrency: Currency = .goldPiece
+    //@State var leftCurrency: Currency = .silverPiece
+    //@State var rightCurrency: Currency = .goldPiece
+    
+    @AppStorage("leftCurrency") private var leftCurrencyRaw: Int = Currency.silverPenny.rawValue
+    @AppStorage("rightCurrency") private var rightCurrencyRaw: Int = Currency.goldPenny.rawValue
+    
+    //Computed Properties
+    private var leftCurrency: Currency {
+        get { Currency(rawValue: leftCurrencyRaw) ?? .silverPiece}
+        set { leftCurrencyRaw = newValue.rawValue}
+    }
+    
+    private var rightCurrency: Currency {
+        get { Currency(rawValue: rightCurrencyRaw) ?? .goldPiece}
+        set { rightCurrencyRaw = newValue.rawValue}
+    }
     
     let currencyTip = CurrencyTip()
     
@@ -161,9 +175,17 @@ struct ContentView: View {
             ExchangeInfo() //ACA se abre el sheet view, que posteriormente se cierra con el boton ya que tiene la funcion DISMISS
         }
         
-        .sheet(isPresented: $showSelectCurrency){
-            SelectCurrency(topCurrency: $leftCurrency, bottomCurrency: $rightCurrency)
-            //Tienen que mostrarse las dos propiedades de la clase SelectCurrency
+        .sheet(isPresented: $showSelectCurrency) {
+            SelectCurrency(
+                topCurrency: Binding<Currency>(
+                    get: { Currency(rawValue: leftCurrencyRaw) ?? .silverPiece },
+                    set: { newValue in leftCurrencyRaw = newValue.rawValue }
+                ),
+                bottomCurrency: Binding<Currency>(
+                    get: { Currency(rawValue: rightCurrencyRaw) ?? .goldPiece },
+                    set: { newValue in rightCurrencyRaw = newValue.rawValue }
+                )
+            )
         }
     }
 }
