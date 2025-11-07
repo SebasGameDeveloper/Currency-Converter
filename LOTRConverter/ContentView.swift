@@ -56,73 +56,19 @@ struct ContentView: View {
                     .font(.largeTitle)
                     .foregroundStyle(.white)
                 //Conversion section
-                HStack{
-                    //Left conversion section
-                    VStack{
-                        //Currency
-                        HStack{
-                            //currency image
-                            Image(leftCurrency.image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 33)
-                            
-                            //currency text
-                            Text(leftCurrency.name)
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                        }
-                        .padding(.bottom, -5)
-                        .onTapGesture {
-                            showSelectCurrency.toggle()
-                            currencyTip.invalidate(reason: .actionPerformed) //elimina el consejo cuando el usuario ejecuta la accion.
-                        }
-                        .popoverTip(currencyTip, arrowEdge: .bottom)
-                        
-                        //Text field
-                        TextField("Amount", text: $leftAmount)
-                            .textFieldStyle(.roundedBorder)
-                            .focused($lefTyping)
-                    }
-                    //Equal sing
-                    Image(systemName: "equal")
-                        .font(.largeTitle)
-                        .foregroundStyle(.white)
-                        .symbolEffect(.pulse)
-                    
-                    //Right conversion section
-                    VStack{
-                        //Currency
-                        HStack{
-                            //currency text
-                            Text(rightCurrency.name)
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                            
-                            //currency image
-                            Image(rightCurrency.image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 33)
-                        }
-                        .padding(.bottom, -5)
-                        .onTapGesture {
-                            showSelectCurrency.toggle()
-                            currencyTip.invalidate(reason: .actionPerformed)
-                        }
-                        
-                        //Text field
-                        TextField("Amount", text: $rightAmount)
-                            .textFieldStyle(.roundedBorder)
-                            .multilineTextAlignment(.trailing)
-                            .focused($rightTyping)
-                    }
-                }
-                
+                ConversionRow(
+                    leftCurrency: leftCurrency,
+                    rightCurrency: rightCurrency,
+                    leftAmount: $leftAmount,
+                    rightAmount: $rightAmount,
+                    lefTyping: $lefTyping,
+                    rightTyping: $rightTyping,
+                    showSelectCurrency: $showSelectCurrency,
+                    currencyTip: currencyTip
+                )
                 .padding()
                 .background(.black.opacity(0.5))
                 .clipShape(.capsule)
-                .keyboardType(.decimalPad)
                 
                 Spacer()
                 //Info button
@@ -141,6 +87,22 @@ struct ContentView: View {
                 }
             }
         }
+        .contentShape(Rectangle())
+        .onTapGesture{
+            lefTyping = false
+            rightTyping = false
+        }
+        
+        /*.toolbar {
+            ToolbarItemGroup(placement: .keyboard){
+                Spacer()
+                Button("Done"){
+                    lefTyping = false
+                    rightTyping = false
+                }
+            }
+        }*/
+        
         .task {
             try? Tips.configure()
         }
@@ -186,6 +148,84 @@ struct ContentView: View {
                     set: { newValue in rightCurrencyRaw = newValue.rawValue }
                 )
             )
+        }
+    }
+}
+
+private struct ConversionRow: View {
+    let leftCurrency: Currency
+    let rightCurrency: Currency
+    @Binding var leftAmount: String
+    @Binding var rightAmount: String
+    @FocusState.Binding var lefTyping: Bool
+    @FocusState.Binding var rightTyping: Bool
+    @Binding var showSelectCurrency: Bool
+    let currencyTip: CurrencyTip
+
+    var body: some View {
+        HStack{
+            //Left conversion section
+            VStack{
+                //Currency
+                HStack{
+                    //currency image
+                    Image(leftCurrency.image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 33)
+
+                    //currency text
+                    Text(leftCurrency.name)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                }
+                .padding(.bottom, -5)
+                .onTapGesture {
+                    showSelectCurrency.toggle()
+                    currencyTip.invalidate(reason: .actionPerformed)
+                }
+                .popoverTip(currencyTip, arrowEdge: .bottom)
+
+                //Text field
+                TextField("Amount", text: $leftAmount)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($lefTyping)
+                    .keyboardType(.decimalPad)
+            }
+            //Equal sing
+            Image(systemName: "equal")
+                .font(.largeTitle)
+                .foregroundStyle(.white)
+                .symbolEffect(.pulse)
+
+            //Right conversion section
+            VStack{
+                //Currency
+                HStack{
+                    //currency text
+                    Text(rightCurrency.name)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+
+                    //currency image
+                    Image(rightCurrency.image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 33)
+                }
+                .padding(.bottom, -5)
+                .onTapGesture {
+                    showSelectCurrency.toggle()
+                    currencyTip.invalidate(reason: .actionPerformed)
+                }
+
+                //Text field
+                TextField("Amount", text: $rightAmount)
+                    .textFieldStyle(.roundedBorder)
+                    .multilineTextAlignment(.trailing)
+                    .focused($rightTyping)
+                    .keyboardType(.decimalPad)
+            }
         }
     }
 }
